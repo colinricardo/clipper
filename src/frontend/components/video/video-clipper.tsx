@@ -5,12 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
-import { processVideo } from "@/components/video/process-video";
+import processVideo from "@/components/video/process-video";
 import { VideoFormData } from "@/components/video/types";
 import useFFmpeg from "@/components/video/use-ffmpeg";
+import { errorToast } from "@/frontend/lib/toast";
 import { IdPrefix, randomId } from "@/frontend/utils/ids";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 export default () => {
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ export default () => {
 
   const handleSubmit = async (formData: VideoFormData): Promise<void> => {
     if (!ffmpeg) {
-      toast.error("FFmpeg not initialized");
+      errorToast("FFmpeg not initialized");
       return;
     }
 
@@ -37,7 +37,7 @@ export default () => {
       const clipUrl = URL.createObjectURL(processedVideo);
       setOutputVideoUrl(clipUrl);
     } catch (err) {
-      toast.error(
+      errorToast(
         err instanceof Error
           ? err.message
           : "An unknown error occurred while processing the video."
@@ -115,7 +115,7 @@ export default () => {
       setEndTime(data.duration);
     } catch (error) {
       console.error("Error fetching video duration:", error);
-      toast.error("Failed to fetch video duration");
+      errorToast("Failed to fetch video duration");
     }
   };
 

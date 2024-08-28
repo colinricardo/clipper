@@ -1,19 +1,19 @@
 import { VideoFormData } from "@/components/video/types";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 
-export const processVideo = async (
+export default async (
   formData: VideoFormData,
   ffmpeg: FFmpeg
 ): Promise<Blob> => {
   const { url, startTime, endTime } = formData;
 
-  // Download the entire video
   const response = await fetch("/api/download", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ url }),
+    credentials: "include",
   });
 
   if (!response.ok) {
@@ -23,7 +23,6 @@ export const processVideo = async (
   const videoBlob = await response.blob();
   const videoArrayBuffer = await videoBlob.arrayBuffer();
 
-  // Process the video with FFmpeg
   await ffmpeg.writeFile("input.mp4", new Uint8Array(videoArrayBuffer));
 
   const clipDuration = parseFloat(endTime) - parseFloat(startTime);
