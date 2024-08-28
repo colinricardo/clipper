@@ -68,10 +68,10 @@
     "cls-hooked": "4.2.2",
     "clsx": "2.1.1",
     "cmdk": "1.0.0",
+    "cookies-next": "^4.2.1",
     "copy-to-clipboard": "3.3.3",
     "dayjs": "1.11.13",
     "embla-carousel-react": "8.1.5",
-    "google-auth-library": "9.14.0",
     "http-errors": "2.0.0",
     "input-otp": "1.2.4",
     "jotai": "2.9.3",
@@ -93,7 +93,6 @@
     "tailwindcss-animate": "1.0.7",
     "uuid": "10.0.0",
     "vaul": "0.9.1",
-    "ytdl-core": "^4.11.5",
     "zod": "3.23.8"
   },
   "devDependencies": {

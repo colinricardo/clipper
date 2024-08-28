@@ -2,28 +2,19 @@ import ytdl from "@distube/ytdl-core";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const { url } = await req.json();
-  const cookies = req.headers.get("cookie") || "";
-
   try {
+    const { url, cookies } = await req.json();
+    if (!url) {
+      return NextResponse.json({ error: "URL is required" }, { status: 400 });
+    }
+
+    const agent = ytdl.createAgent(cookies);
+
     const videoId = ytdl.getVideoID(url);
-    const videoInfo = await ytdl.getInfo(videoId, {
-      requestOptions: {
-        headers: {
-          cookie: cookies,
-        },
-      },
-    });
+    const videoInfo = await ytdl.getInfo(videoId, { agent });
     const format = ytdl.chooseFormat(videoInfo.formats, { quality: "highest" });
 
-    const videoStream = ytdl(url, {
-      format: format,
-      requestOptions: {
-        headers: {
-          cookie: cookies,
-        },
-      },
-    });
+    const videoStream = ytdl(url, { format, agent });
     const chunks: Uint8Array[] = [];
 
     for await (const chunk of videoStream) {
@@ -35,13 +26,15 @@ export async function POST(req: NextRequest) {
     return new NextResponse(videoBuffer, {
       headers: {
         "Content-Type": "video/mp4",
-        "Content-Disposition": `attachment; filename="video_${videoId}.mp4"`,
+        "Content-Disposition": `attachment; filename="${
+          videoInfo.videoDetails.title || `video_${videoId}`
+        }.mp4"`,
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error processing video:", error);
     return NextResponse.json(
-      { error: "An error occurred while downloading the video" },
+      { error: "An error occurred while processing the video" },
       { status: 500 }
     );
   }

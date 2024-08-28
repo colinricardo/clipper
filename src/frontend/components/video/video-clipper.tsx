@@ -5,12 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
-import processVideo from "@/components/video/process-video";
 import { VideoFormData } from "@/components/video/types";
 import useFFmpeg from "@/components/video/use-ffmpeg";
 import { errorToast } from "@/frontend/lib/toast";
 import { IdPrefix, randomId } from "@/frontend/utils/ids";
-import { useEffect, useState } from "react";
+import { getCookies } from "cookies-next";
+import { useCallback, useEffect, useState } from "react";
 
 export default () => {
   const [loading, setLoading] = useState(false);
@@ -33,16 +33,61 @@ export default () => {
     setOutputVideoUrl("");
 
     try {
-      const processedVideo = await processVideo(formData, ffmpeg);
-      const clipUrl = URL.createObjectURL(processedVideo);
+      console.log("Starting video processing...");
+      const allCookies = getCookies();
+
+      const response = await fetch("/api/download", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: Object.entries(allCookies)
+            .map(([name, value]) => `${name}=${value}`)
+            .join("; "),
+        },
+        body: JSON.stringify(formData),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to download video");
+      }
+
+      console.log("Video downloaded successfully");
+      const videoBlob = await response.blob();
+      const videoArrayBuffer = await videoBlob.arrayBuffer();
+
+      console.log("Writing file to FFmpeg...");
+      await ffmpeg.writeFile("input.mp4", new Uint8Array(videoArrayBuffer));
+
+      console.log("Executing FFmpeg command...");
+      const clipDuration =
+        parseFloat(formData.endTime) - parseFloat(formData.startTime);
+      await ffmpeg.exec([
+        "-ss",
+        formData.startTime,
+        "-i",
+        "input.mp4",
+        "-t",
+        clipDuration.toString(),
+        "-c",
+        "copy",
+        "output.mp4",
+      ]);
+
+      console.log("FFmpeg command executed successfully");
+      const data = await ffmpeg.readFile("output.mp4");
+      const uint8Array = new Uint8Array(data as ArrayBuffer);
+      const clipBlob = new Blob([uint8Array], { type: "video/mp4" });
+      const clipUrl = URL.createObjectURL(clipBlob);
       setOutputVideoUrl(clipUrl);
+      console.log("Video processing completed");
     } catch (err) {
+      console.error("Error during video processing:", err);
       errorToast(
         err instanceof Error
           ? err.message
           : "An unknown error occurred while processing the video."
       );
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -91,19 +136,25 @@ export default () => {
   const handleClip = () => {
     handleSubmit({
       url: videoUrl,
-      startTime: startTime.toString(),
-      endTime: endTime.toString(),
+      startTime: startTime.toFixed(2),
+      endTime: endTime.toFixed(2),
     });
   };
 
-  const fetchVideoDuration = async (url: string) => {
+  const fetchVideoDuration = useCallback(async (url: string) => {
     try {
+      const allCookies = getCookies();
+
       const response = await fetch("/api/preview", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Cookie: Object.entries(allCookies)
+            .map(([name, value]) => `${name}=${value}`)
+            .join("; "),
         },
         body: JSON.stringify({ url }),
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -117,7 +168,7 @@ export default () => {
       console.error("Error fetching video duration:", error);
       errorToast("Failed to fetch video duration");
     }
-  };
+  }, []);
 
   useEffect(() => {
     const extractVideoId = (url: string) => {
