@@ -9,7 +9,6 @@ import { VideoFormData } from "@/components/video/types";
 import useFFmpeg from "@/components/video/use-ffmpeg";
 import { errorToast } from "@/frontend/lib/toast";
 import { IdPrefix, randomId } from "@/frontend/utils/ids";
-import { getCookies } from "cookies-next";
 import { useCallback, useEffect, useState } from "react";
 
 export default () => {
@@ -34,15 +33,11 @@ export default () => {
 
     try {
       console.log("Starting video processing...");
-      const allCookies = getCookies();
 
       const response = await fetch("/api/download", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Cookie: Object.entries(allCookies)
-            .map(([name, value]) => `${name}=${value}`)
-            .join("; "),
         },
         body: JSON.stringify(formData),
         credentials: "include",
@@ -94,7 +89,20 @@ export default () => {
   };
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setVideoUrl(e.target.value);
+    const newUrl = e.target.value;
+    setVideoUrl(newUrl);
+
+    // Extract video ID and fetch duration when URL changes
+    const id = extractVideoId(newUrl);
+    if (id) {
+      setVideoId(id);
+      fetchVideoDuration(newUrl);
+    } else {
+      setVideoId("");
+      setDuration(0);
+      setStartTime(0);
+      setEndTime(0);
+    }
   };
 
   const handleDownload = () => {
@@ -143,18 +151,13 @@ export default () => {
 
   const fetchVideoDuration = useCallback(async (url: string) => {
     try {
-      const allCookies = getCookies();
-
+      setLoading(true);
       const response = await fetch("/api/preview", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Cookie: Object.entries(allCookies)
-            .map(([name, value]) => `${name}=${value}`)
-            .join("; "),
         },
         body: JSON.stringify({ url }),
-        credentials: "include",
       });
 
       if (!response.ok) {
@@ -167,29 +170,17 @@ export default () => {
     } catch (error) {
       console.error("Error fetching video duration:", error);
       errorToast("Failed to fetch video duration");
+    } finally {
+      setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    const extractVideoId = (url: string) => {
-      const regExp =
-        /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      const match = url.match(regExp);
-      return match && match[2].length === 11 ? match[2] : null;
-    };
-
-    const id = extractVideoId(videoUrl);
-    setVideoId(id || "");
-
-    if (id) {
-      fetchVideoDuration(videoUrl);
-    } else {
-      // Reset duration and times if no valid video ID
-      setDuration(0);
-      setStartTime(0);
-      setEndTime(0);
-    }
-  }, [videoUrl]);
+  const extractVideoId = (url: string) => {
+    const regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11 ? match[2] : null;
+  };
 
   useEffect(() => {
     setClipDuration(endTime - startTime);

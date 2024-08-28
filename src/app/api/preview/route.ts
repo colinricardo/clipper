@@ -1,17 +1,15 @@
 import ytdl from "@distube/ytdl-core";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+export const POST = async (req: NextRequest) => {
   try {
-    const { url, cookies } = await req.json();
+    const { url } = await req.json();
     if (!url) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
     }
 
-    const agent = ytdl.createAgent(cookies);
-
     const videoId = ytdl.getVideoID(url);
-    const videoInfo = await ytdl.getBasicInfo(videoId, { agent });
+    const videoInfo = await ytdl.getBasicInfo(videoId);
 
     const lengthSeconds = parseInt(videoInfo.videoDetails.lengthSeconds);
 
@@ -27,4 +25,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+};
