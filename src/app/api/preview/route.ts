@@ -1,7 +1,7 @@
 import ytdl from "@distube/ytdl-core";
 import { NextRequest, NextResponse } from "next/server";
 
-export default async function POST(req: NextRequest) {
+export const POST = async (req: NextRequest) => {
   try {
     const { url } = await req.json();
     const cookies = req.headers.get("cookie") || "";
@@ -20,7 +20,14 @@ export default async function POST(req: NextRequest) {
 
     const lengthSeconds = parseInt(info.videoDetails.lengthSeconds);
 
-    return NextResponse.json({ duration: lengthSeconds });
+    return NextResponse.json(
+      { duration: lengthSeconds },
+      {
+        headers: {
+          "Set-Cookie": cookies,
+        },
+      }
+    );
   } catch (error) {
     console.error("Error fetching video info:", error);
     return NextResponse.json(
@@ -28,4 +35,4 @@ export default async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+};
