@@ -1,5 +1,4 @@
 import VideoClipper from "@/frontend/components/video/video-clipper";
-import { Toaster } from "sonner";
 
 export default async () => {
   return (
@@ -11,7 +10,6 @@ export default async () => {
       <div className="max-w-2xl mx-auto">
         <VideoClipper />
       </div>
-      <Toaster />
     </div>
   );
 };
