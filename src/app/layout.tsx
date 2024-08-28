@@ -6,6 +6,7 @@ import { Inter as FontSans } from "next/font/google";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import TailwindIndicator from "@/frontend/components/common/TailwindIndicator";
+import Navbar from "@/frontend/components/layout/Navbar";
 import ActiveModals from "@/frontend/components/modals/ActiveModals";
 import { APP_NAME } from "@/frontend/config";
 import { JotaiProvider } from "@/frontend/lib/jotai-provider";
@@ -36,8 +37,10 @@ export default ({ children }: { children: React.ReactNode }) => {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TRPCReactProvider>
             <JotaiProvider>
-              <TooltipProvider>{children}</TooltipProvider>
-              <ActiveModals />
+              <TooltipProvider>
+                <Navbar>{children}</Navbar>
+                <ActiveModals />
+              </TooltipProvider>
             </JotaiProvider>
           </TRPCReactProvider>
         </ThemeProvider>

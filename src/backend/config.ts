@@ -10,4 +10,4 @@ export const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 export const LOGTAIL_TOKEN = "toVDCLvMbBMonfKCQGpUd7Q9";
 export const GIT_COMMIT_SHA = process.env.VERCEL_GIT_COMMIT_SHA;
-export const APP_NAME = "simpletemplate";
+export const APP_NAME = "clipper";

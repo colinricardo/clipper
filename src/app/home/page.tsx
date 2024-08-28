@@ -1,22 +1,17 @@
-import { api } from "@/trpc/server";
+import VideoClipper from "@/frontend/components/video/video-clipper";
+import { Toaster } from "sonner";
 
 export default async () => {
-  const user = await api.user.current();
-
-  const renderMain = () => {
-    return (
-      <div className="flex flex-col items-center space-y-4 text-center justify-center w-full p-4">
-        <h1 className="text-lg font-semibold md:text-2xl">welcome</h1>
-      </div>
-    );
-  };
-
   return (
-    <>
-      <div className="flex items-center">
-        <h1 className="text-lg font-semibold md:text-2xl">Home</h1>
+    <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <p className="text-center mb-8 text-gray-600">
+        Processing is done locally using WASM. Long videos might time out.
+      </p>
+
+      <div className="max-w-2xl mx-auto">
+        <VideoClipper />
       </div>
-      <div className="flex">{renderMain()}</div>
-    </>
+      <Toaster />
+    </div>
   );
 };

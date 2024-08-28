@@ -15,4 +15,4 @@ export const TRPC_URL = `${BASE_URL}/api/trpc`;
 
 export const MODAL_SIZE_MEDIUM = "w-[50vw] h-[50vh]";
 export const MODAL_SIZE_SMALL = "w-[50vw] h-[25wh]";
-export const APP_NAME = "simpletemplate";
+export const APP_NAME = "clipper";

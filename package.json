@@ -13,6 +13,12 @@
     "dbstudio": "prisma studio --schema=./src/backend/prisma/schema.prisma"
   },
   "dependencies": {
+    "@distube/ytdl-core": "^4.14.4",
+    "@ffmpeg/core": "^0.12.6",
+    "@ffmpeg/core-mt": "^0.12.6",
+    "@ffmpeg/ffmpeg": "^0.12.10",
+    "@ffmpeg/types": "^0.12.2",
+    "@ffmpeg/util": "^0.12.1",
     "@logtail/node": "0.4.21",
     "@logtail/types": "0.4.20",
     "@prisma/client": "5.15.1",
@@ -87,6 +93,7 @@
     "tailwindcss-animate": "1.0.7",
     "uuid": "10.0.0",
     "vaul": "0.9.1",
+    "ytdl-core": "^4.11.5",
     "zod": "3.23.8"
   },
   "devDependencies": {

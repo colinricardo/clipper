@@ -7,7 +7,7 @@ const SIZE = 16;
 const nanoid = customAlphabet(ALPHABET, SIZE);
 
 export enum IdPrefix {
-  Message = "msg_",
+  Clip = "clip_",
 }
 
 export const randomId = ({ prefix }: { prefix?: IdPrefix }) => {
